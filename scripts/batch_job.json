@@ -1,0 +1,70 @@
+{
+    "name": "projects/${PROJECT_ID}/locations/${REGION}/jobs/${ENTRYSCRIPT}",
+    "taskGroups": [
+        {
+            "taskSpec": {
+                "runnables": [
+                    {
+                        "container": {
+                            "imageUri": "gcr.io/${PROJECT_ID}/${CONTAINER_IMAGE}:latest",
+                            "commands": [
+                                "python",
+                                "src/${ENTRYSCRIPT}.py"
+                            ]
+                        }
+                    }
+                ],
+                "environment": {
+                    "variables": {
+                        "INPUT_MOUNT_PATH": "${INPUT_MOUNT_PATH}",
+                        "RESULT_MOUNT_PATH": "${RESULT_MOUNT_PATH}",
+                        "BUCKET_PATH": "${BUCKET_PATH}",
+                        "OUTPUT_BUCKET_FILES": "${OUTPUT_BUCKET_FILES}",
+                        "COMPLETE_MODE": "${COMPLETE_MODE}",
+                        "SPAN": "${SPAN}"
+                    }
+                },
+                "computeResource": {
+                    "cpuMilli": ${CPU_MILLI},
+                    "memoryMib": ${MEMORY_MIB}
+                },
+                "maxRunDuration": "${MAX_RUN_DURATION}",
+                "maxRetryCount": ${MAX_RETRY_COUNT},
+                "volumes": [
+                    {
+                        "gcs": {
+                            "remotePath": "${INPUT_BUCKET_NAME}"
+                        },
+                        "mountPath": "${INPUT_MOUNT_PATH}"
+                    },
+                    {
+                        "gcs": {
+                            "remotePath": "${RESULT_BUCKET_NAME}"
+                        },
+                        "mountPath": "${RESULT_MOUNT_PATH}"
+                    }
+                ]
+            },
+            "taskCount": ${TASK_COUNT},
+            "parallelism": ${PARALLELISM},
+        }
+    ],
+    "allocationPolicy": {
+        "location": {
+            "allowedLocations": [
+                "regions/${REGION}"
+            ]
+        },
+        "instances": [
+            {
+                "policy": {
+                    "machineType": "${MACHINE_TYPE}",
+                    "provisioningModel": "${PROVISIONING_MODEL}"
+                }
+            }
+        ]
+    },
+    "logsPolicy": {
+        "destination": "CLOUD_LOGGING"
+    }
+}
