@@ -3,7 +3,7 @@ from utils.checkpointing import JobData, InputFile
 
 def main():
     print("Job started.")
-    with JobData("input_%d.txt", "output_%d.txt") as job_data:
+    with JobData("input_*.txt", "output_*.txt") as job_data:
         for input_file in job_data.input_files():
             with open(input_file.path, 'r') as f:
                 data = f.read()
@@ -20,7 +20,7 @@ def main_alt():
         # Example processing: convert to uppercase
         return bytes(data.upper(), 'utf-8')
 
-    job_data = JobData("input_%d.txt", "output_%d.txt")
+    job_data = JobData("input_*.txt", "output_*.txt")
     job_data.process_files(process_function)
     print("Job completed.")
 

@@ -1,0 +1,6 @@
+{
+    "policy": {
+        "machineType": "${MACHINE_TYPE}",
+        "provisioningModel": "${PROVISIONING_MODEL}"
+    }
+}

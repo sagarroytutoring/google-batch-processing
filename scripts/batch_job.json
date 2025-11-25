@@ -21,7 +21,9 @@
                         "BUCKET_PATH": "${BUCKET_PATH}",
                         "OUTPUT_BUCKET_FILES": "${OUTPUT_BUCKET_FILES}",
                         "COMPLETE_MODE": "${COMPLETE_MODE}",
-                        "SPAN": "${SPAN}"
+                        "SPAN": "${SPAN}",
+                        "GPU_TYPE": "${GPU_TYPE}",
+                        "GPU_COUNT": "${GPU_COUNT}"
                     }
                 },
                 "computeResource": {
@@ -52,16 +54,11 @@
     "allocationPolicy": {
         "location": {
             "allowedLocations": [
-                "regions/${REGION}"
+                "${COMPUTE_LOCATION}"
             ]
         },
         "instances": [
-            {
-                "policy": {
-                    "machineType": "${MACHINE_TYPE}",
-                    "provisioningModel": "${PROVISIONING_MODEL}"
-                }
-            }
+            ${INSTANCE_CONFIG}
         ]
     },
     "logsPolicy": {

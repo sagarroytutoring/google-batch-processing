@@ -1,0 +1,7 @@
+- cannot get logging working in container, only print seems to work
+- error is coming up in console talking about how some weights are not initialized
+- how do we know that in the VM the model is loaded from the snapshot?
+- in the checkpointing, it is required that the first try delete all the output files that need to be. But what if it fails before reaching this point?
+- should padding and truncation be used for protein tokenizer? one of the papers (forgot which) chunked the proteins instead of tokenizing
+- can we use multiple gpu per task?
+- maybe there is a way to run both GPU and non-GPU VMS and balance the load between them. This may be needed because we may have a limit to the number of GPU's we can allocate

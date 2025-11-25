@@ -24,6 +24,12 @@ export PARALLELISM=${parallelism}
 export ENTRYSCRIPT=${1}
 export OUTPUT_BUCKET_FILES=$(gcloud storage ls gs://${OUTPUT_BUCKET_NAME}/${BUCKET_PATH}/ 2> /dev/null || :)
 
+if [ -n "${GPU_TYPE}" ] && [ -n "${GPU_COUNT}" ]; then
+    export INSTANCE_CONFIG=$(MSYS_NO_PATHCONV=1 envsubst < ./instances_w_gpu.json)
+else
+    export INSTANCE_CONFIG=$(MSYS_NO_PATHCONV=1 envsubst < ./instances_no_gpu.json)
+fi
+
 gcloud batch jobs submit --job-prefix=${1} --location=${REGION} --project=${PROJECT_ID} --config - <<EOF
 $(MSYS_NO_PATHCONV=1 envsubst < ./batch_job.json)
 EOF

@@ -3,31 +3,14 @@ import time
 import os
 from dataclasses import dataclass
 from typing import Optional, Callable
-import re
 from .intspan import IntSpan
+from .star_format import StarFormat
 
 
 @dataclass
 class InputFile:
-    idx: int
+    idx: str
     path: str
-
-
-class SingleIntFormat:
-    def __init__(self, format: str) -> None:
-        if not format.count('%d') == 1:
-            raise ValueError("Format string must contain exactly one '%d', found: " + format)
-        self._format = format
-        self._re = re.compile(format.replace('%d', r'(\d+)'))
-    
-    def match(self, filename: str) -> Optional[int]:
-        m = self._re.fullmatch(filename)
-        if m:
-            return int(m.group(1))
-        return None
-    
-    def format(self, idx: int) -> str:
-        return self._format % idx
 
 
 class JobData:
@@ -49,11 +32,11 @@ class JobData:
             raise ValueError("Subdirectory does not exist in input bucket")
         os.makedirs(self._output_dir, exist_ok=True)
 
-        self._input_format = SingleIntFormat(input_format)
-        self._output_format = SingleIntFormat(output_format)
+        self._input_format = StarFormat(input_format)
+        self._output_format = StarFormat(output_format)
 
         self._interval = interval or 15
-        self._output_dict: dict[int, bytes] = {}
+        self._output_dict: dict[str, bytes] = {}
         self._output_lock = threading.Lock()
         self._running_flush = False
 
@@ -63,10 +46,11 @@ class JobData:
 
         self._ins_list = self._list_ins()
         self.__job_ins_range = self._job_ins_range()
+        self._first_attempt_init()
         print(f"Job initialized for subdir: {subdir}")
         print(f"Number of input files to process: {self.__job_ins_range[1] - self.__job_ins_range[0]}")
 
-    def _list_ins(self) -> list[int]:
+    def _list_ins(self) -> list[str]:
         # Create a set of indices to include, if a span is specified
         spanset = set(self._span) if self._span else None
 
@@ -101,6 +85,19 @@ class JobData:
         end_idx = start_idx + min_ins + (job_index < rem_ins)
         return start_idx, end_idx
     
+    def _first_attempt_init(self) -> None:
+        if os.environ['BATCH_TASK_RETRY_ATTEMPT'] != '0':
+            return
+
+        print("First attempt for this task, clearing output files for this task's input files.")
+        start_idx, end_idx = self.__job_ins_range
+        for i in range(start_idx, end_idx):
+            output_path = os.path.join(self._output_dir, self._output_format.format(self._ins_list[i]))
+            if os.path.exists(output_path):
+                print(f"Removing existing output file: {output_path}")
+                os.remove(output_path)
+        print("Cleared output files for this task's input files.")
+    
     def input_files(self) -> list[InputFile]:
         start_idx, end_idx = self.__job_ins_range
         return [
@@ -109,6 +106,10 @@ class JobData:
                 path=os.path.join(self._input_dir, self._input_format.format(self._ins_list[i]))
             )
             for i in range(start_idx, end_idx)
+
+            # This check is here because in task retries, some files may have been completed in previous attempts
+            # If this is the first attempt, all output files would have been cleared already, so all files are included
+            if not os.path.exists(os.path.join(self._output_dir, self._output_format.format(self._ins_list[i])))
         ]
 
     def write(self, input_file: InputFile, data: bytes) -> None:

@@ -1,0 +1,12 @@
+{
+    "policy": {
+        "provisioningModel": "${PROVISIONING_MODEL}",
+        "reservation": "NO_RESERVATION",
+        "accelerators": [
+            {
+                "type": "${GPU_TYPE}",
+                "count": "${GPU_COUNT}"
+            }
+        ]
+    }
+}
