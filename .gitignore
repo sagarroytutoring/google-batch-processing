@@ -3,3 +3,4 @@ infra/.terraform.lock.hcl
 infra/terraform.tfstate
 infra/terraform.tfstate.backup
 container/src/utils/__pycache__/
+sagar_testing/*

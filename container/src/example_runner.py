@@ -12,6 +12,7 @@ def main():
             job_data.write(input_file, bytes(processed_data, 'utf-8'))
     print("Job completed.")
 
+
 def main_alt():
     print("Job started.")
     def process_function(file_path: str) -> bytes:
@@ -23,7 +24,6 @@ def main_alt():
     job_data = JobData("input_*.txt", "output_*.txt")
     job_data.process_files(process_function)
     print("Job completed.")
-
 
 
 if __name__ == "__main__":

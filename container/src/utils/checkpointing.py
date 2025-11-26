@@ -68,7 +68,7 @@ class JobData:
         ins = set()
         for filename in os.listdir(self._input_dir):
             idx = self._input_format.match(filename)
-            if idx is not None and (spanset is None or idx in spanset) and (idx not in outset):
+            if idx is not None and (spanset is None or int(idx) in spanset) and (idx not in outset):
                 ins.add(idx)
         return sorted(ins)
 
