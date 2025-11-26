@@ -23,10 +23,11 @@ class JobData:
             span: Optional[str]=None
         ) -> None:
 
-        subdir = os.environ['BUCKET_PATH']
-        print(f"Initializing JobData for subdir: {subdir}")
-        self._input_dir = os.path.join(os.environ['INPUT_MOUNT_PATH'], subdir)
-        self._output_dir = os.path.join(os.environ['RESULT_MOUNT_PATH'], subdir)
+        input_subdir = os.environ['INPUT_BUCKET_PATH']
+        output_subdir = os.environ['OUTPUT_BUCKET_PATH']
+        print(f"Initializing JobData for subdir: {input_subdir}")
+        self._input_dir = os.path.join(os.environ['INPUT_MOUNT_PATH'], input_subdir)
+        self._output_dir = os.path.join(os.environ['RESULT_MOUNT_PATH'], output_subdir)
         if not os.path.exists(self._input_dir):
             print("Input directory contents: " + str(os.listdir(os.environ['INPUT_MOUNT_PATH'])))
             raise ValueError("Subdirectory does not exist in input bucket")
@@ -47,7 +48,7 @@ class JobData:
         self._ins_list = self._list_ins()
         self.__job_ins_range = self._job_ins_range()
         self._first_attempt_init()
-        print(f"Job initialized for subdir: {subdir}")
+        print(f"Job initialized for subdir: {input_subdir}")
         print(f"Number of input files to process: {self.__job_ins_range[1] - self.__job_ins_range[0]}")
 
     def _list_ins(self) -> list[str]:

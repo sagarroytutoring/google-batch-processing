@@ -18,7 +18,8 @@
                     "variables": {
                         "INPUT_MOUNT_PATH": "${INPUT_MOUNT_PATH}",
                         "RESULT_MOUNT_PATH": "${RESULT_MOUNT_PATH}",
-                        "BUCKET_PATH": "${BUCKET_PATH}",
+                        "INPUT_BUCKET_PATH": "${INPUT_BUCKET_PATH}",
+                        "OUTPUT_BUCKET_PATH": "${OUTPUT_BUCKET_PATH}",
                         "OUTPUT_BUCKET_FILES": "${OUTPUT_BUCKET_FILES}",
                         "COMPLETE_MODE": "${COMPLETE_MODE}",
                         "SPAN": "${SPAN}",

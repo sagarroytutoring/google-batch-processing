@@ -20,7 +20,8 @@ export COMPLETE_MODE="REMAINING"
 export SPAN=""  # Only use if input files are numbered!
 export TASK_COUNT="100"
 export PARALLELISM="5000"
-export BUCKET_PATH="fasta_cafa6"
+export INPUT_BUCKET_PATH="fasta_cafa6"
+export OUTPUT_BUCKET_PATH="fasta_cafa6"
 export COMPUTE_LOCATION="regions/us-west1"
 
 
