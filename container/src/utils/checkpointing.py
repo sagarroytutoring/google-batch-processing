@@ -97,7 +97,7 @@ class JobData:
                 print(f"Removing existing output file: {output_path}")
                 os.remove(output_path)
         print("Cleared output files for this task's input files.")
-    
+
     def input_files(self) -> list[InputFile]:
         start_idx, end_idx = self.__job_ins_range
         return [
