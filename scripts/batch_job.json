@@ -17,10 +17,11 @@
                 "environment": {
                     "variables": {
                         "INPUT_MOUNT_PATH": "${INPUT_MOUNT_PATH}",
-                        "RESULT_MOUNT_PATH": "${RESULT_MOUNT_PATH}",
+                        "OUTPUT_MOUNT_PATH": "${OUTPUT_MOUNT_PATH}",
                         "INPUT_BUCKET_PATH": "${INPUT_BUCKET_PATH}",
                         "OUTPUT_BUCKET_PATH": "${OUTPUT_BUCKET_PATH}",
                         "OUTPUT_BUCKET_FILES": "${OUTPUT_BUCKET_FILES}",
+                        "INPUT_PACKED": "${INPUT_PACKED}",
                         "COMPLETE_MODE": "${COMPLETE_MODE}",
                         "SPAN": "${SPAN}",
                         "GPU_TYPE": "${GPU_TYPE}",
@@ -42,9 +43,9 @@
                     },
                     {
                         "gcs": {
-                            "remotePath": "${RESULT_BUCKET_NAME}"
+                            "remotePath": "${OUTPUT_BUCKET_NAME}"
                         },
-                        "mountPath": "${RESULT_MOUNT_PATH}"
+                        "mountPath": "${OUTPUT_MOUNT_PATH}"
                     }
                 ]
             },

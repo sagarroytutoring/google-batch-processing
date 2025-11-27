@@ -27,7 +27,7 @@ class JobData:
         output_subdir = os.environ['OUTPUT_BUCKET_PATH']
         print(f"Initializing JobData for subdir: {input_subdir}")
         self._input_dir = os.path.join(os.environ['INPUT_MOUNT_PATH'], input_subdir)
-        self._output_dir = os.path.join(os.environ['RESULT_MOUNT_PATH'], output_subdir)
+        self._output_dir = os.path.join(os.environ['OUTPUT_MOUNT_PATH'], output_subdir)
         if not os.path.exists(self._input_dir):
             print("Input directory contents: " + str(os.listdir(os.environ['INPUT_MOUNT_PATH'])))
             raise ValueError("Subdirectory does not exist in input bucket")
@@ -59,15 +59,18 @@ class JobData:
         # Otherwise, all files matching the input format are included, redoing any previously completed
         outset = set()
         if self._complete_mode == 'REMAINING':
-            filenames = [os.path.basename(path) for path in os.environ["OUTPUT_BUCKET_FILES"].split()[1:]]  # Skip folder path
+            filenames = [os.path.basename(path) for path in os.environ["OUTPUT_BUCKET_FILES"].split()[1:]]  # Skip folder  (TODO: check if splitting logic is right)
             for filename in filenames:
                 idx = self._output_format.match(filename)
                 if idx is not None:
                     outset.add(idx)
+        print(f"Excluding {len(outset)} completed files from processing.")
 
         # List input indices based on the above sets
+        filenames = os.listdir(self._input_dir)
+        print(f"Found {len(filenames)} files in input directory.")
         ins = set()
-        for filename in os.listdir(self._input_dir):
+        for filename in filenames:
             idx = self._input_format.match(filename)
             if idx is not None and (spanset is None or int(idx) in spanset) and (idx not in outset):
                 ins.add(idx)
@@ -124,8 +127,8 @@ class JobData:
                 output_path = os.path.join(self._output_dir, self._output_format.format(idx))
                 with open(output_path, 'wb') as f:
                     f.write(data)
+            print(f"Wrote {len(self._output_dict)} output files.")
             self._output_dict.clear()
-        print("Flushed output data.")
 
     def __enter__(self):
         print(f"Entering JobData context at input dir {self._input_dir}")

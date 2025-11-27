@@ -5,8 +5,80 @@
 - maybe there is a way to run both GPU and non-GPU VMS and balance the load between them. This may be needed because we may have a limit to the number of GPU's we can allocate
 
 planned optimization (easiest to hardest):
-- check parallelization limit (DONE: 5000)
-- add unpacking/repacking functionality
-- run multiple proteins at once
+- check parallelization limit (DONE: 2000 VMs for single zone job, 4000 VMs for multi-zone, 5000 parallel tasks in general, current quota is 24 VMs)
+- run multiple proteins at once (DONE: makes it slower. Most likely due to padding proteins to longest length)
+- try reducing resources per task (DONE: speed doubled)
 - try to figure out if more cpu/memory would help
+- add unpacking/repacking functionality
 - run on GPU
+
+benchmarks:
+
+CONFIG:
+80k cafa6
+100 tasks
+10 parallel
+n2-standard-4
+2000 cpumilli
+8192 mib memory
+SPOT
+individual proteins
+RESULT:
+2.5 minutes to start run
+46:35 to run
+
+CONFIG:
+80k cafa6
+100 tasks
+20 parallel
+n2-standard-4
+2000 cpumilli
+8192 mib memory
+SPOT
+individual proteins
+RESULT:
+2.5 minutes to start run
+39:44 to run
+concurrent VM quota exceeded once
+
+CONFIG:
+80k cafa6
+100 tasks
+20 parallel
+n2-standard-4
+2000 cpumilli
+8192 mib memory
+SPOT
+20 protein batches
+RESULT:
+2.5 minutes to start run
+54:53 to run
+concurrent VM quota exceeded once
+embeddings are padded (based on max protein length in batch it seems)
+embeddings are also slightly different (because of padding or randomness?)
+
+CONFIG:
+80k cafa6
+100 tasks
+20 parallel
+n2-standard-4
+2000 cpumilli
+8192 mib memory
+SPOT
+100 protein batches
+RESULT:
+2.5 mins to start run
+1:02:00 to run
+
+CONFIG:
+80k cafa6
+100 tasks
+24 parallel
+n2-standard-4
+1000 cpumilli
+4096 mib memory
+SPOT
+individual proteins
+RESULT:
+2 mins to start run
+31:01 to run

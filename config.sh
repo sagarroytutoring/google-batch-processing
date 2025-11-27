@@ -3,7 +3,7 @@ export SERVICE_ACCOUNT_ID="cafa-6-pfp-preprocessing-sa"  # Not implemented
 export SERVICE_ACCOUNT_DISPLAY_NAME="CAFA 6 PFP Preprocessing Service Account"
 export PROJECT_ID="cafa-6-pfp"
 export REGION="us-west1"
-export RESULT_BUCKET_NAME="pfp-data-sagarroytutoring"
+export OUTPUT_BUCKET_NAME="pfp-data-sagarroytutoring"
 export INPUT_BUCKET_NAME="pfp-input-sagarroytutoring"
 export CONTAINER_IMAGE="preprocessing-container"
 
@@ -14,25 +14,26 @@ export GPU_COUNT=""
 export PROVISIONING_MODEL="SPOT"
 export MAX_RUN_DURATION="7200s"
 export MAX_RETRY_COUNT="5"
-export CPU_MILLI="2000"
-export MEMORY_MIB="8192"
+export CPU_MILLI="1000"
+export MEMORY_MIB="4096"
 export COMPLETE_MODE="REMAINING"
 export SPAN=""  # Only use if input files are numbered!
 export TASK_COUNT="100"
-export PARALLELISM="5000"
+export PARALLELISM="24"  # vCPU quota is currently 24
 export INPUT_BUCKET_PATH="fasta_cafa6"
-export OUTPUT_BUCKET_PATH="fasta_cafa6"
+export INPUT_PACKED="false"
+export OUTPUT_BUCKET_PATH="fasta_cafa6_protein_halved_resources"
 export COMPUTE_LOCATION="regions/us-west1"
 
 
 # Do not modify below this line
 export SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com"
 export INPUT_MOUNT_PATH="/mnt/disks/input"
-export RESULT_MOUNT_PATH="/mnt/disks/output"
+export OUTPUT_MOUNT_PATH="/mnt/disks/output"
 
 export TF_VAR_project_id=$PROJECT_ID
 export TF_VAR_region=$REGION
-export TF_VAR_result_bucket_name=$RESULT_BUCKET_NAME
+export TF_VAR_result_bucket_name=$OUTPUT_BUCKET_NAME
 export TF_VAR_input_bucket_name=$INPUT_BUCKET_NAME
 export TF_VAR_service_account_id=$SERVICE_ACCOUNT_ID
 export TF_VAR_service_account_display_name=$SERVICE_ACCOUNT_DISPLAY_NAME
