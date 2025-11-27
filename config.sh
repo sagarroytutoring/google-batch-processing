@@ -9,20 +9,20 @@ export CONTAINER_IMAGE="preprocessing-container"
 
 # Job configuration
 export MACHINE_TYPE="n2-standard-4"
+export CPU_MILLI="1000"
+export MEMORY_MIB="4096"  # Correct amount of resources for 4 tasks on n2-standard-4
 export GPU_TYPE=""  # If specified, the machine type is ignored (Not implemented yet)
 export GPU_COUNT=""
 export PROVISIONING_MODEL="SPOT"
 export MAX_RUN_DURATION="7200s"
 export MAX_RETRY_COUNT="5"
-export CPU_MILLI="1000"
-export MEMORY_MIB="4096"
 export COMPLETE_MODE="REMAINING"
 export SPAN=""  # Only use if input files are numbered!
-export TASK_COUNT="100"
+export TASK_COUNT="500"
 export PARALLELISM="24"  # vCPU quota is currently 24
-export INPUT_BUCKET_PATH="fasta_cafa6"
-export INPUT_PACKED="false"
-export OUTPUT_BUCKET_PATH="fasta_cafa6_protein_halved_resources"
+export INPUT_BUCKET_PATH="uniprot_sprot.fasta"
+export INPUT_PACKED="true"
+export OUTPUT_BUCKET_PATH="fasta_sprot"
 export COMPUTE_LOCATION="regions/us-west1"
 
 
@@ -30,6 +30,7 @@ export COMPUTE_LOCATION="regions/us-west1"
 export SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com"
 export INPUT_MOUNT_PATH="/mnt/disks/input"
 export OUTPUT_MOUNT_PATH="/mnt/disks/output"
+export CHECKPOINT_INTERVAL="15"
 
 export TF_VAR_project_id=$PROJECT_ID
 export TF_VAR_region=$REGION

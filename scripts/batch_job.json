@@ -16,6 +16,7 @@
                 ],
                 "environment": {
                     "variables": {
+                        "CHECKPOINT_INTERVAL": "${CHECKPOINT_INTERVAL}",
                         "INPUT_MOUNT_PATH": "${INPUT_MOUNT_PATH}",
                         "OUTPUT_MOUNT_PATH": "${OUTPUT_MOUNT_PATH}",
                         "INPUT_BUCKET_PATH": "${INPUT_BUCKET_PATH}",

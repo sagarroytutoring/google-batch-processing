@@ -1,11 +1,13 @@
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 from transformers import AutoModel, AutoTokenizer, EsmModel, EsmTokenizer
 from transformers.modeling_outputs import BaseModelOutputWithPoolingAndCrossAttentions
 from Bio import SeqIO
 import numpy as np
 import torch
-from utils.checkpointing import JobData, InputFile
+from utils.checkpointing import JobData
 from itertools import batched
+from typing import BinaryIO
+import os
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -16,8 +18,32 @@ model: EsmModel = AutoModel.from_pretrained(model_id).to(device)
 PROTEIN_CHUNK_SIZE = model.config.max_position_embeddings - tokenizer.num_special_tokens_to_add()  # accounting for special tokens
 
 
-def process_protein(file_path: str) -> bytes:
-    first_fasta, *other_fasta = list(SeqIO.parse(file_path, "fasta"))
+def separate_fasta(file_path: str) -> list[tuple[str, BinaryIO]]:
+    with open(file_path, 'r') as infile:
+        fastas_lines: list[list[str]] = []
+        ids: list[str] = []
+        for line in infile:
+            if line.startswith('>'):
+                fastas_lines.append([])
+                ids.append(line.split('|')[1])
+            fastas_lines[-1].append(line)
+
+        fastas = [
+            BytesIO(bytes('\n'.join(fasta_lines), 'utf-8'))
+            for fasta_lines in fastas_lines
+        ]
+        return list(zip(ids, fastas, strict=True))
+
+
+print("Input packed:", os.environ["INPUT_PACKED"])
+input = separate_fasta if os.environ['INPUT_PACKED'].lower() == 'true' else "*.fasta"
+job_data = JobData.get_data(input, "*.npy")
+
+
+def process_protein(data: BinaryIO) -> bytes:
+    data_string = TextIOWrapper(data)
+    first_fasta, *other_fasta = list(SeqIO.parse(data_string, "fasta"))
+    data.close()
     if other_fasta:
         raise ValueError("Input FASTA file contains multiple sequences; only single sequence files are supported.")
 
@@ -30,20 +56,23 @@ def process_protein(file_path: str) -> bytes:
     stream = BytesIO()
     np.save(stream, embedding)
     stream.seek(0)
-    return stream.read()
+    np_data = stream.read()
+    stream.close()
+    return np_data
 
 
 def main_individual():
     print("Job started.")
-    job_data = JobData("*.fasta", "*.npy")
     job_data.process_files(process_protein)
     print("Job completed.")
 
 
-def process_protein_batch(file_paths: list[str]) -> list[bytes]:
+def process_protein_batch(datas: list[BinaryIO]) -> list[bytes]:
     fastas = []
-    for file_path in file_paths:
-        first_fasta, *other_fasta = list(SeqIO.parse(file_path, "fasta"))
+    for data in datas:
+        data_string = TextIOWrapper(data)
+        first_fasta, *other_fasta = list(SeqIO.parse(data_string, "fasta"))
+        data.close()
         if other_fasta:
             raise ValueError("Input FASTA file contains multiple sequences; only single sequence files are supported.")
         fastas.append(first_fasta)
@@ -72,15 +101,16 @@ def process_protein_batch(file_paths: list[str]) -> list[bytes]:
         np.save(stream, data)
         stream.seek(0)
         embeds.append(stream.read())
+        stream.close()
     return embeds
 
 
 BATCH_SIZE = 100  # Careful! The larger the batch, the lower the fault tolerance
 def main_batched():
     print("Job started.")
-    with JobData("*.fasta", "*.npy") as job_data:
+    with job_data:
         for input_files in batched(job_data.input_files(), BATCH_SIZE):
-            outs = process_protein_batch([input_file.path for input_file in input_files])
+            outs = process_protein_batch([input_file.data for input_file in input_files])
             for input_file, out in zip(input_files, outs):
                 job_data.write(input_file, out)
     print("Job completed.")
