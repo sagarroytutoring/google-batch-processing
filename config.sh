@@ -18,11 +18,12 @@ export MAX_RUN_DURATION="7200s"
 export MAX_RETRY_COUNT="5"
 export COMPLETE_MODE="REMAINING"
 export SPAN=""  # Only use if input files are numbered!
-export TASK_COUNT="500"
+export TASK_COUNT="50"
 export PARALLELISM="24"  # vCPU quota is currently 24
-export INPUT_BUCKET_PATH="uniprot_sprot.fasta"
+export INPUT_BUCKET_PATH="go-basic.obo"
 export INPUT_PACKED="true"
-export OUTPUT_BUCKET_PATH="fasta_sprot"
+export OUTPUT_BUCKET_PATH="go_basic_embeddings"
+export OUTPUT_ZIPPED="true"
 export COMPUTE_LOCATION="regions/us-west1"
 
 

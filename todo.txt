@@ -8,8 +8,9 @@ planned optimization (easiest to hardest):
 - check parallelization limit (DONE: 2000 VMs for single zone job, 4000 VMs for multi-zone, 5000 parallel tasks in general, current quota is 24 VMs)
 - run multiple proteins at once (DONE: makes it slower. Most likely due to padding proteins to longest length)
 - try reducing resources per task (DONE: speed doubled)
+- add unpacking/repacking functionality (DONE: unpacking done, repacking will not be implemented)
+- allow outputting as zip files (to save on storage operation costs)
 - try to figure out if more cpu/memory would help
-- add unpacking/repacking functionality
 - run on GPU
 
 benchmarks:
@@ -82,3 +83,32 @@ individual proteins
 RESULT:
 2 mins to start run
 31:01 to run
+
+CONFIG:
+500k swissprot
+500 tasks
+24 parallel
+n2-standard-4
+1000 cpumilli
+4096 mib memory
+SPOT
+individual proteins
+packed input
+RESULT:
+2.5 mins to start run
+2:19:00 to run
+incurred like $5 of storage costs, presumably because it created 500k files
+
+CONFIG:
+500k swissprot
+500 tasks
+24 parallel
+n2-standard-4
+1000 cpumilli
+4096 mib memory
+SPOT
+individual proteins
+packed input
+zipped outputs
+RESULT:
+2:18:00 to run

@@ -17,4 +17,13 @@ snapshot_download(
 )
 EOF
 
+# Pre-download the Hugging Face embedder
+RUN python - <<EOF
+from huggingface_hub import snapshot_download
+snapshot_download(
+    repo_id="dmis-lab/biobert-v1.1",
+    local_dir="/app/models"
+)
+EOF
+
 COPY src/ ./src/

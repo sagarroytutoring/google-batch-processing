@@ -23,6 +23,7 @@
                         "OUTPUT_BUCKET_PATH": "${OUTPUT_BUCKET_PATH}",
                         "OUTPUT_BUCKET_FILES": "${OUTPUT_BUCKET_FILES}",
                         "INPUT_PACKED": "${INPUT_PACKED}",
+                        "OUTPUT_ZIPPED": "${OUTPUT_ZIPPED}",
                         "COMPLETE_MODE": "${COMPLETE_MODE}",
                         "SPAN": "${SPAN}",
                         "GPU_TYPE": "${GPU_TYPE}",

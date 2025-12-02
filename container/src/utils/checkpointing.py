@@ -1,6 +1,7 @@
 import threading
 import time
 import os
+import tarfile
 import io
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -16,7 +17,8 @@ class InputFile:
 
 
 DEFAULT_INTERVAL = int(os.environ['CHECKPOINT_INTERVAL'])
-
+DEFAULT_COMPRESSION = 'gz'
+TARFILE_EXT = f'tar.{DEFAULT_COMPRESSION}'
 
 class JobData(ABC):
     def __init__(self,
@@ -41,6 +43,7 @@ class JobData(ABC):
         self._output_dict: dict[str, bytes] = {}
         self._output_lock = threading.Lock()
         self._running_flush = False
+        self._output_zip = os.environ['OUTPUT_ZIPPED'].lower() == 'true'
 
         self._complete_mode = complete_mode or os.environ['COMPLETE_MODE']
         spanstr = os.environ['SPAN'] if span is None else span  # Cannot use 'or' because '' is valid
@@ -99,12 +102,14 @@ class JobData(ABC):
 
     def _first_attempt_init(self) -> None:
         if os.environ['BATCH_TASK_RETRY_ATTEMPT'] != '0':
+            print(f"Retry number {os.environ['BATCH_TASK_RETRY_ATTEMPT']} for task index {os.environ['BATCH_TASK_INDEX']}, not deleting existing outputs")
             return
 
         print("First attempt for this task, clearing output files for this task's input files.")
         start_idx, end_idx = self.__job_ins_range
         for i in range(start_idx, end_idx):
-            output_path = os.path.join(self._output_path, self._output_format.format(self._ins_list[i]))
+            output_filename = f"{self._ins_list[i]}.{TARFILE_EXT}" if self._output_zip else self._output_format.format(self._ins_list[i])
+            output_path = os.path.join(self._output_path, output_filename)
             if os.path.exists(output_path):
                 print(f"Removing existing output file: {output_path}")
                 os.remove(output_path)
@@ -114,16 +119,35 @@ class JobData(ABC):
     def _stream_from_idx(self, idx) -> BinaryIO:
         pass
 
-    def input_files(self) -> Iterator[InputFile]:  # FLAGGED
+    def _preexisting_outputs(self) -> set[str]:
+        outset = set()
         start_idx, end_idx = self.__job_ins_range
+        if self._output_zip:
+            for i in range(start_idx, end_idx):
+                idx = self._ins_list[i]
+                tarpath = os.path.join(self._output_path, f'{idx}.{TARFILE_EXT}')
+                if os.path.exists(tarpath):
+                    with tarfile.open(tarpath) as f:
+                        outfiles = f.getnames()
+                    outset.update(self._output_format.match(outfile) for outfile in outfiles)
+            outset.discard(None)  # In case there is a nonmatching file in the tar for some reason
+        else:
+            for i in range(start_idx, end_idx):
+                idx = self._ins_list[i]
+                if os.path.exists(os.path.join(self._output_path, self._output_format.format(idx))):
+                    outset.add(self._ins_list[i])
+        return outset
 
+    def input_files(self) -> Iterator[InputFile]:  # FLAGGED
+        preexisting_outputs = self._preexisting_outputs()
+        start_idx, end_idx = self.__job_ins_range
         for i in range(start_idx, end_idx):
+            idx = self._ins_list[i]
             # This check is here because in task retries, some files may have been completed in previous attempts
             # If this is the first attempt, all output files would have been cleared already, so all files are included
-            if os.path.exists(os.path.join(self._output_path, self._output_format.format(self._ins_list[i]))):
+            if idx in preexisting_outputs:
                 continue
 
-            idx = self._ins_list[i]
             f = self._stream_from_idx(idx)
             yield InputFile(idx=idx, data=f)
 
@@ -134,10 +158,22 @@ class JobData(ABC):
     def _flush(self):
         print("Flushing output data.")
         with self._output_lock:
-            for idx, data in self._output_dict.items():
-                output_path = os.path.join(self._output_path, self._output_format.format(idx))
-                with open(output_path, 'wb') as f:
-                    f.write(data)
+            if self._output_zip:
+                if not self._output_dict:
+                    return
+
+                first_idx = next(iter(self._output_dict.keys()))
+                with tarfile.open(os.path.join(self._output_path, f'{first_idx}.{TARFILE_EXT}'), f'w:{DEFAULT_COMPRESSION}') as tar:
+                    for idx, data in self._output_dict.items():
+                        info = tarfile.TarInfo(self._output_format.format(idx))
+                        info.size = len(data)
+                        stream = io.BytesIO(data)
+                        tar.addfile(tarinfo=info, fileobj=stream)
+            else:
+                for idx, data in self._output_dict.items():
+                    output_path = os.path.join(self._output_path, self._output_format.format(idx))
+                    with open(output_path, 'wb') as f:
+                        f.write(data)
             print(f"Wrote {len(self._output_dict)} output files.")
             self._output_dict.clear()
 
@@ -221,4 +257,3 @@ class JobDataMultiFile(JobData):
     def _stream_from_idx(self, idx) -> BinaryIO:
         file_path = os.path.join(self._input_path, self._input_format.format(idx))
         return open(file_path, 'rb')
-
