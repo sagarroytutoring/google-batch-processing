@@ -23,6 +23,7 @@ export PARALLELISM="24"  # vCPU quota is currently 24
 export INPUT_BUCKET_PATH="go-basic.obo"
 export INPUT_PACKED="true"
 export OUTPUT_BUCKET_PATH="go_basic_embeddings"
+export OUTPUT_BUCKET_PATH_650M="go_basic_embeddings_650M"
 export OUTPUT_ZIPPED="true"
 export COMPUTE_LOCATION="regions/us-west1"
 

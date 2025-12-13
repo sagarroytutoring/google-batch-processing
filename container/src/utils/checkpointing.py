@@ -28,7 +28,7 @@ class JobData(ABC):
         span: Optional[str]=None,
     ) -> None:
         input_path = os.environ['INPUT_BUCKET_PATH']
-        output_path = os.environ['OUTPUT_BUCKET_PATH']
+        output_path = os.environ['OUTPUT_BUCKET_PATH_650M']
         print(f"Initializing JobData for input: {input_path}")
         self._input_path = os.path.join(os.environ['INPUT_MOUNT_PATH'], input_path)
         self._output_path = os.path.join(os.environ['OUTPUT_MOUNT_PATH'], output_path)

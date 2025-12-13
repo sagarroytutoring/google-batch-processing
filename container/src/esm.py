@@ -12,9 +12,10 @@ import os
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
-model_id = "facebook/esm2_t6_8M_UR50D"
-tokenizer: EsmTokenizer = AutoTokenizer.from_pretrained(model_id)
-model: EsmModel = AutoModel.from_pretrained(model_id).to(device)
+# model_id = "facebook/esm2_t6_8M_UR50D" # Old Model
+model_650M_id = "facebook/esm2_t33_650M_UR50D"
+tokenizer: EsmTokenizer = AutoTokenizer.from_pretrained(model_650M_id)
+model: EsmModel = AutoModel.from_pretrained(model_650M_id).to(device)
 PROTEIN_CHUNK_SIZE = model.config.max_position_embeddings - tokenizer.num_special_tokens_to_add()  # accounting for special tokens
 
 
