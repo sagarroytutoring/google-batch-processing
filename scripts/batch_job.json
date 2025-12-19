@@ -21,7 +21,7 @@
                         "OUTPUT_MOUNT_PATH": "${OUTPUT_MOUNT_PATH}",
                         "INPUT_BUCKET_PATH": "${INPUT_BUCKET_PATH}",
                         "OUTPUT_BUCKET_PATH": "${OUTPUT_BUCKET_PATH}",
-                        "OUTPUT_BUCKET_FILES": "${OUTPUT_BUCKET_FILES}",
+                        "OUTPUT_BUCKET_LS_NAME": "${OUTPUT_BUCKET_LS_NAME}",
                         "INPUT_PACKED": "${INPUT_PACKED}",
                         "OUTPUT_ZIPPED": "${OUTPUT_ZIPPED}",
                         "COMPLETE_MODE": "${COMPLETE_MODE}",
@@ -52,7 +52,7 @@
                 ]
             },
             "taskCount": ${TASK_COUNT},
-            "parallelism": ${PARALLELISM},
+            "parallelism": ${PARALLELISM}
         }
     ],
     "allocationPolicy": {

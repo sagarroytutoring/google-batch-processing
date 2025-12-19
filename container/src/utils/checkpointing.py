@@ -28,10 +28,11 @@ class JobData(ABC):
         span: Optional[str]=None,
     ) -> None:
         input_path = os.environ['INPUT_BUCKET_PATH']
-        output_path = os.environ['OUTPUT_BUCKET_PATH_650M']
+        output_path = os.environ['OUTPUT_BUCKET_PATH']
         print(f"Initializing JobData for input: {input_path}")
         self._input_path = os.path.join(os.environ['INPUT_MOUNT_PATH'], input_path)
         self._output_path = os.path.join(os.environ['OUTPUT_MOUNT_PATH'], output_path)
+        self._output_files_path = os.path.join(self._output_path, os.environ['OUTPUT_BUCKET_LS_NAME'])
         if not os.path.exists(self._input_path):
             print("Input directory contents: " + str(os.listdir(os.environ['INPUT_MOUNT_PATH'])))
             raise ValueError("Input path does not exist in input bucket")
@@ -67,11 +68,16 @@ class JobData(ABC):
         # Otherwise, all files matching the input format are included, redoing any previously completed
         outset = set()
         if self._complete_mode == 'REMAINING':
-            filenames = [os.path.basename(path) for path in os.environ["OUTPUT_BUCKET_FILES"].split()[1:]]  # Skip folder  (TODO: check if splitting logic is right)
-            for filename in filenames:
-                idx = self._output_format.match(filename)
-                if idx is not None:
-                    outset.add(idx)
+            with open(self._output_files_path, 'r') as f:
+                for line in f:
+                    if self._output_zip:
+                        print("Complete mode REMAINING not implemented with zipped output.")
+                        print("Found preexisiting files in folder, exiting.")
+                        raise NotImplementedError("Complete mode REMAINING not implemented with zipped output.")
+                    filename = os.path.basename(line.strip())
+                    idx = self._output_format.match(filename)
+                    if idx is not None:
+                        outset.add(idx)
         print(f"Excluding {len(outset)} completed files from processing.")
 
         # List input indices based on the above sets
